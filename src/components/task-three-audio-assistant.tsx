@@ -141,7 +141,7 @@ export default function TaskThreeAudioAssistant() {
   }, [script]);
 
   return (
-    <section className="rounded-[1.75rem] border border-[var(--line)] bg-[var(--card-strong)] p-5">
+    <section className="rounded-[1.75rem] border border-[var(--line)] bg-[var(--card-strong)] p-5 text-[var(--foreground)]">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-sm font-medium tracking-[0.14em] text-[var(--olive)] uppercase">
@@ -268,7 +268,7 @@ export default function TaskThreeAudioAssistant() {
             value={script}
             onChange={(event) => setScript(event.target.value)}
             rows={7}
-            className="mt-2 w-full rounded-[1.25rem] border border-[var(--line)] bg-white px-4 py-3 text-sm leading-7 outline-none transition focus:border-[var(--accent)]"
+            className="mt-2 w-full rounded-[1.25rem] border border-[var(--line)] bg-white px-4 py-3 text-sm leading-7 text-[var(--foreground)] outline-none transition placeholder:text-[#9b8f80] focus:border-[var(--accent)]"
             placeholder="예: 여전도회 바자회 초청 내레이션 문장을 적어주세요."
           />
         </label>
@@ -281,7 +281,7 @@ export default function TaskThreeAudioAssistant() {
             value={styleGuide}
             onChange={(event) => setStyleGuide(event.target.value)}
             rows={4}
-            className="mt-2 w-full rounded-[1.25rem] border border-[var(--line)] bg-white px-4 py-3 text-sm leading-7 outline-none transition focus:border-[var(--accent)]"
+            className="mt-2 w-full rounded-[1.25rem] border border-[var(--line)] bg-white px-4 py-3 text-sm leading-7 text-[var(--foreground)] outline-none transition placeholder:text-[#9b8f80] focus:border-[var(--accent)]"
             placeholder="예: 따뜻하고 천천히, 또렷하게 읽어줘."
           />
         </label>
@@ -314,7 +314,7 @@ export default function TaskThreeAudioAssistant() {
       ) : null}
 
       <div className="mt-5 grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
-        <article className="rounded-[1.25rem] border border-[var(--line)] bg-white p-4">
+        <article className="rounded-[1.25rem] border border-[var(--line)] bg-white p-4 text-[var(--foreground)]">
           <p className="text-sm font-medium text-[var(--muted)]">사용한 대본과 안내</p>
           <div className="mt-3 rounded-2xl bg-[#f8f5ef] p-4 text-sm leading-7">
             <p className="text-xs font-semibold tracking-[0.12em] text-[var(--muted)] uppercase">
@@ -340,7 +340,7 @@ export default function TaskThreeAudioAssistant() {
           </p>
         </article>
 
-        <article className="rounded-[1.25rem] border border-[var(--line)] bg-white p-4">
+        <article className="rounded-[1.25rem] border border-[var(--line)] bg-white p-4 text-[var(--foreground)]">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-sm font-medium text-[var(--muted)]">생성된 오디오</p>

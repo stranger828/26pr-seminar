@@ -169,7 +169,7 @@ export default function TaskFourVideoAssistant() {
   }
 
   return (
-    <section className="rounded-[1.75rem] border border-[var(--line)] bg-[var(--card-strong)] p-5">
+    <section className="rounded-[1.75rem] border border-[var(--line)] bg-[var(--card-strong)] p-5 text-[var(--foreground)]">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-sm font-medium tracking-[0.14em] text-[var(--olive)] uppercase">
@@ -273,7 +273,7 @@ export default function TaskFourVideoAssistant() {
             value={script}
             onChange={(event) => setScript(event.target.value)}
             rows={6}
-            className="mt-2 w-full rounded-[1.25rem] border border-[var(--line)] bg-white px-4 py-3 text-sm leading-7 outline-none transition focus:border-[var(--accent)]"
+            className="mt-2 w-full rounded-[1.25rem] border border-[var(--line)] bg-white px-4 py-3 text-sm leading-7 text-[var(--foreground)] outline-none transition placeholder:text-[#9b8f80] focus:border-[var(--accent)]"
             placeholder="예: 초청 문안이나 묵상 문장을 붙여넣어 주세요."
           />
         </label>
@@ -286,7 +286,7 @@ export default function TaskFourVideoAssistant() {
             value={motionPrompt}
             onChange={(event) => setMotionPrompt(event.target.value)}
             rows={6}
-            className="mt-2 w-full rounded-[1.25rem] border border-[var(--line)] bg-white px-4 py-3 text-sm leading-7 outline-none transition focus:border-[var(--accent)]"
+            className="mt-2 w-full rounded-[1.25rem] border border-[var(--line)] bg-white px-4 py-3 text-sm leading-7 text-[var(--foreground)] outline-none transition placeholder:text-[#9b8f80] focus:border-[var(--accent)]"
             placeholder="예: 햇살이 은은하게 움직이고 카메라가 천천히 앞으로 다가오는 따뜻한 초청 영상"
           />
         </label>
@@ -318,7 +318,7 @@ export default function TaskFourVideoAssistant() {
       ) : null}
 
       <div className="mt-5 grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
-        <article className="rounded-[1.25rem] border border-[var(--line)] bg-white p-4">
+        <article className="rounded-[1.25rem] border border-[var(--line)] bg-white p-4 text-[var(--foreground)]">
           <p className="text-sm font-medium text-[var(--muted)]">참고 자료</p>
           <div className="mt-3 space-y-4">
             <div className="overflow-hidden rounded-2xl bg-[#f8f5ef]">
@@ -354,7 +354,7 @@ export default function TaskFourVideoAssistant() {
           </div>
         </article>
 
-        <article className="rounded-[1.25rem] border border-[var(--line)] bg-white p-4">
+        <article className="rounded-[1.25rem] border border-[var(--line)] bg-white p-4 text-[var(--foreground)]">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-sm font-medium text-[var(--muted)]">생성된 영상</p>

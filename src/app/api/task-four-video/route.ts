@@ -388,19 +388,49 @@ async function getGeminiJobResult(externalJobId: string): Promise<JobPollResult>
 
   const video = operation.response?.generatedVideos?.[0]?.video;
 
-  if (!video?.videoBytes) {
+  if (video?.videoBytes) {
+    return {
+      status: "completed",
+      provider: "gemini",
+      bytes: Buffer.from(video.videoBytes, "base64"),
+      mimeType: video.mimeType || "video/mp4",
+    };
+  }
+
+  if (video?.uri) {
+    const downloadResponse = await fetch(video.uri);
+
+    if (!downloadResponse.ok) {
+      return {
+        status: "failed",
+        provider: "gemini",
+        error: "Gemini 생성 영상을 다운로드하지 못했습니다.",
+      };
+    }
+
+    return {
+      status: "completed",
+      provider: "gemini",
+      bytes: Buffer.from(await downloadResponse.arrayBuffer()),
+      mimeType: video.mimeType || "video/mp4",
+    };
+  }
+
+  if (operation.error) {
     return {
       status: "failed",
       provider: "gemini",
-      error: "Gemini 영상 응답에서 결과 파일을 찾지 못했습니다.",
+      error:
+        typeof operation.error.message === "string"
+          ? operation.error.message
+          : "Gemini 영상 생성이 실패했습니다.",
     };
   }
 
   return {
-    status: "completed",
+    status: "failed",
     provider: "gemini",
-    bytes: Buffer.from(video.videoBytes, "base64"),
-    mimeType: video.mimeType || "video/mp4",
+    error: "Gemini 영상 응답에서 결과 파일을 찾지 못했습니다.",
   };
 }
 

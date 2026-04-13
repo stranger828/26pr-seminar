@@ -1,11 +1,21 @@
+import { connection } from "next/server";
 import Link from "next/link";
 import GalleryBoard from "@/components/gallery-board";
-import { listGalleryItems } from "@/lib/gallery-store";
+import { listGalleryItems, type GalleryItem } from "@/lib/gallery-store";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function GalleryPage() {
-  const items = await listGalleryItems();
+  await connection();
+
+  let items: GalleryItem[] = [];
+
+  try {
+    items = await listGalleryItems();
+  } catch (error) {
+    console.error("Failed to load gallery items:", error);
+  }
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-5 px-4 py-5 sm:px-6 sm:py-8">

@@ -11,30 +11,40 @@ const taskMap = {
     intro: "짧은 홍보 문장과 내레이션 원고를 만드는 단계입니다.",
     purpose: "영상의 전체 분위기와 메시지를 정하는 가장 중요한 출발점입니다.",
     output: "완성 문장 1개",
+    themeLabel: "Paper Desk",
+    themeHint: "크래프트지와 편지지 위에서 차분히 첫 문장을 다듬는 시간",
   },
   "2": {
     title: "AI로 이미지 만들기",
     intro: "문장의 분위기에 어울리는 대표 이미지를 만드는 단계입니다.",
     purpose: "영상 첫인상을 정하고, 이후 영상 생성 단계의 시각 재료가 됩니다.",
     output: "대표 이미지 1~2장",
+    themeLabel: "Canvas Studio",
+    themeHint: "마른 물감과 캔버스 결이 느껴지는 작업실 같은 장면",
   },
   "3": {
     title: "AI로 오디오 만들기",
     intro: "문장을 음성으로 바꾸어 내레이션을 만드는 단계입니다.",
     purpose: "영상이 훨씬 친근하고 전달력 있게 느껴지도록 도와줍니다.",
     output: "음성 파일 1개",
+    themeLabel: "On Air Booth",
+    themeHint: "녹음실의 붉은 조명과 따뜻한 흡음 패널 사이에서 목소리를 만드는 단계",
   },
   "4": {
     title: "AI로 영상 만들기",
     intro: "이미지와 오디오를 바탕으로 영상 초안을 만드는 단계입니다.",
     purpose: "앞 단계의 결과물을 하나의 움직이는 콘텐츠로 연결합니다.",
     output: "영상 초안 1개",
+    themeLabel: "Cinema Draft",
+    themeHint: "붉은 커튼과 스포트라이트 아래에서 첫 장면을 상영하는 느낌",
   },
   "5": {
     title: "영상 편집하기",
     intro: "CapCut에서 자막과 마무리 문구를 더해 완성도를 높이는 단계입니다.",
     purpose: "AI가 만든 초안을 사람이 보기 좋고 전하기 좋은 영상으로 다듬습니다.",
     output: "완성 영상 1개",
+    themeLabel: "Glass Edit Room",
+    themeHint: "마무리 편집 단계에 어울리는 유리 패널 느낌의 차분한 작업 공간",
   },
 } as const;
 
@@ -59,37 +69,56 @@ export default async function TaskDetail({
   const isSecondTask = step === "2";
   const isThirdTask = step === "3";
   const isFourthTask = step === "4";
+  const stageClass = `task-stage-shell task-theme-${step}`;
+  const sectionClass =
+    "task-shell-card rounded-[2rem] border px-5 py-6 shadow-[0_18px_40px_rgba(73,52,30,0.06)] sm:px-8";
+  const softCardClass = "task-soft-panel rounded-[1.5rem] border p-5";
+  const noteCardClass =
+    "task-note-panel rounded-2xl p-4 text-sm leading-7 text-[var(--foreground)]";
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-5 px-4 py-5 sm:px-6 sm:py-8">
-      <section className="rounded-[2rem] border border-[var(--line)] bg-[var(--card)] px-5 py-6 shadow-[0_18px_40px_rgba(73,52,30,0.06)] sm:px-8">
-        <p className="text-sm font-medium tracking-[0.14em] text-[var(--olive)] uppercase">
-          실습 과제 {step}
-        </p>
-        <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">{task.title}</h1>
-        <p className="mt-4 text-base leading-7 text-[var(--muted)] sm:text-lg">
-          {task.intro}
-        </p>
+    <main
+      className={`${stageClass} mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-5 px-4 py-5 sm:px-6 sm:py-8`}
+    >
+      <section className={`${sectionClass} task-hero-card`}>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="text-sm font-medium tracking-[0.14em] text-[var(--olive)] uppercase">
+              실습 과제 {step}
+            </p>
+            <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">{task.title}</h1>
+            <p className="mt-4 max-w-2xl text-base leading-7 text-[var(--muted)] sm:text-lg">
+              {task.intro}
+            </p>
+          </div>
+
+          <div className="task-theme-chip max-w-xs rounded-[1.5rem] px-4 py-4">
+            <p className="text-xs font-semibold tracking-[0.24em] uppercase opacity-75">
+              {task.themeLabel}
+            </p>
+            <p className="mt-3 text-sm leading-6">{task.themeHint}</p>
+          </div>
+        </div>
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <article className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--card-strong)] p-5">
+          <article className={softCardClass}>
             <p className="text-sm font-medium text-[var(--muted)]">왜 필요한가요?</p>
             <p className="mt-2 text-base leading-7">{task.purpose}</p>
           </article>
-          <article className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--card-strong)] p-5">
+          <article className={softCardClass}>
             <p className="text-sm font-medium text-[var(--muted)]">이번 단계 결과물</p>
             <p className="mt-2 text-base leading-7">{task.output}</p>
           </article>
         </div>
       </section>
 
-      <section className="rounded-[2rem] border border-[var(--line)] bg-[var(--card)] px-5 py-6 shadow-[0_18px_40px_rgba(73,52,30,0.06)] sm:px-8">
+      <section className={sectionClass}>
         <p className="text-sm font-medium tracking-[0.14em] text-[var(--olive)] uppercase">
           실습 튜토리얼
         </p>
         {isFirstTask ? (
           <div className="mt-4 space-y-5">
-            <article className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--card-strong)] p-5">
+            <article className={softCardClass}>
               <h2 className="text-xl font-semibold">이번 과제에서 할 일</h2>
               <p className="mt-3 text-sm leading-7 text-[var(--muted)] sm:text-base">
                 오늘 만들 영상의 첫 문장을 AI와 함께 다듬습니다. 너무 길게
@@ -99,7 +128,7 @@ export default async function TaskDetail({
             </article>
 
             <div className="grid gap-4 lg:grid-cols-2">
-              <article className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--card-strong)] p-5">
+              <article className={softCardClass}>
                 <h3 className="text-lg font-semibold">따라하기 순서</h3>
                 <ol className="mt-4 space-y-3 text-sm leading-6 text-[var(--muted)] sm:text-base">
                   <li>1. 아래 예시 주제 중 하나를 고르거나 직접 주제를 적습니다.</li>
@@ -110,7 +139,7 @@ export default async function TaskDetail({
                 </ol>
               </article>
 
-              <article className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--card-strong)] p-5">
+              <article className={softCardClass}>
                 <h3 className="text-lg font-semibold">예시 주제</h3>
                 <ul className="mt-4 space-y-3 text-sm leading-6 text-[var(--muted)] sm:text-base">
                   <li>여전도회 바자회 초청 영상</li>
@@ -121,15 +150,15 @@ export default async function TaskDetail({
               </article>
             </div>
 
-            <article className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--card-strong)] p-5">
+            <article className={softCardClass}>
               <h3 className="text-lg font-semibold">복사해서 바로 써도 되는 요청 예시</h3>
               <div className="mt-4 space-y-3">
-                <div className="rounded-2xl bg-[#f7f3ec] p-4 text-sm leading-7 text-[var(--foreground)]">
+                <div className={noteCardClass}>
                   여전도회 바자회 초청 영상을 만들려고 해. 40대 이상도
                   편하게 들을 수 있는 따뜻하고 쉬운 한국어로 5문장짜리 홍보
                   문장을 써줘. 마지막 문장은 초대의 말로 마무리해줘.
                 </div>
-                <div className="rounded-2xl bg-[#f7f3ec] p-4 text-sm leading-7 text-[var(--foreground)]">
+                <div className={noteCardClass}>
                   교회 행사 안내용 짧은 내레이션 원고가 필요해. 영상 길이는
                   30초 이내이고, 차분하고 정감 있는 말투로 써줘. 너무
                   어려운 단어는 쓰지 말아줘.
@@ -139,7 +168,7 @@ export default async function TaskDetail({
 
             <TaskOneWriterAssistant />
 
-            <article className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--card-strong)] p-5">
+            <article className={softCardClass}>
               <h3 className="text-lg font-semibold">다음 단계로 가져갈 것</h3>
               <p className="mt-3 text-sm leading-7 text-[var(--muted)] sm:text-base">
                 가장 마음에 드는 최종 문장 1개를 정해두세요. 다음 단계에서는 그
@@ -149,7 +178,7 @@ export default async function TaskDetail({
           </div>
         ) : isSecondTask ? (
           <div className="mt-4 space-y-5">
-            <article className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--card-strong)] p-5">
+            <article className={softCardClass}>
               <h2 className="text-xl font-semibold">이번 과제에서 할 일</h2>
               <p className="mt-3 text-sm leading-7 text-[var(--muted)] sm:text-base">
                 1단계에서 만든 문장을 바탕으로 영상의 표지가 될 대표 이미지를
@@ -159,7 +188,7 @@ export default async function TaskDetail({
             </article>
 
             <div className="grid gap-4 lg:grid-cols-2">
-              <article className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--card-strong)] p-5">
+              <article className={softCardClass}>
                 <h3 className="text-lg font-semibold">따라하기 순서</h3>
                 <ol className="mt-4 space-y-3 text-sm leading-6 text-[var(--muted)] sm:text-base">
                   <li>1. 1단계에서 만든 핵심 문장을 짧게 요약합니다.</li>
@@ -170,7 +199,7 @@ export default async function TaskDetail({
                 </ol>
               </article>
 
-              <article className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--card-strong)] p-5">
+              <article className={softCardClass}>
                 <h3 className="text-lg font-semibold">프롬프트에 넣으면 좋은 요소</h3>
                 <ul className="mt-4 space-y-3 text-sm leading-6 text-[var(--muted)] sm:text-base">
                   <li>주제: 여전도회 바자회, 교회 초청, 묵상, 위로</li>
@@ -181,15 +210,15 @@ export default async function TaskDetail({
               </article>
             </div>
 
-            <article className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--card-strong)] p-5">
+            <article className={softCardClass}>
               <h3 className="text-lg font-semibold">복사해서 바로 써도 되는 요청 예시</h3>
               <div className="mt-4 space-y-3">
-                <div className="rounded-2xl bg-[#f7f3ec] p-4 text-sm leading-7 text-[var(--foreground)]">
+                <div className={noteCardClass}>
                   따뜻한 봄날 교회로 초대하는 느낌의 대표 이미지를 만들어줘.
                   부드러운 햇살이 비치는 교회 입구 앞에 미소 짓는 중장년 여성들이
                   서 있고, 환영하는 분위기의 포스터 같은 이미지로 표현해줘.
                 </div>
-                <div className="rounded-2xl bg-[#f7f3ec] p-4 text-sm leading-7 text-[var(--foreground)]">
+                <div className={noteCardClass}>
                   짧은 묵상 영상의 표지 이미지를 만들고 싶어. 새벽빛이 비치는
                   조용한 예배당, 따뜻한 베이지와 하늘색 계열, 평안하고 위로가
                   느껴지는 분위기로 만들어줘.
@@ -199,7 +228,7 @@ export default async function TaskDetail({
 
             <TaskTwoImageAssistant />
 
-            <article className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--card-strong)] p-5">
+            <article className={softCardClass}>
               <h3 className="text-lg font-semibold">다음 단계로 가져갈 것</h3>
               <p className="mt-3 text-sm leading-7 text-[var(--muted)] sm:text-base">
                 가장 마음에 드는 대표 이미지 1장을 정해두세요. 다음 단계에서는
@@ -210,7 +239,7 @@ export default async function TaskDetail({
           </div>
         ) : isThirdTask ? (
           <div className="mt-4 space-y-5">
-            <article className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--card-strong)] p-5">
+            <article className={softCardClass}>
               <h2 className="text-xl font-semibold">이번 과제에서 할 일</h2>
               <p className="mt-3 text-sm leading-7 text-[var(--muted)] sm:text-base">
                 1단계에서 만든 문장을 실제 내레이션 음성으로 바꿉니다. 영상에
@@ -220,7 +249,7 @@ export default async function TaskDetail({
             </article>
 
             <div className="grid gap-4 lg:grid-cols-2">
-              <article className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--card-strong)] p-5">
+              <article className={softCardClass}>
                 <h3 className="text-lg font-semibold">따라하기 순서</h3>
                 <ol className="mt-4 space-y-3 text-sm leading-6 text-[var(--muted)] sm:text-base">
                   <li>1. 1단계에서 정리한 최종 문장을 대본 칸에 붙여넣습니다.</li>
@@ -231,7 +260,7 @@ export default async function TaskDetail({
                 </ol>
               </article>
 
-              <article className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--card-strong)] p-5">
+              <article className={softCardClass}>
                 <h3 className="text-lg font-semibold">자연스럽게 만들 때 팁</h3>
                 <ul className="mt-4 space-y-3 text-sm leading-6 text-[var(--muted)] sm:text-base">
                   <li>한 문장은 너무 길지 않게 나누면 듣기 편해집니다.</li>
@@ -242,16 +271,16 @@ export default async function TaskDetail({
               </article>
             </div>
 
-            <article className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--card-strong)] p-5">
+            <article className={softCardClass}>
               <h3 className="text-lg font-semibold">복사해서 바로 써도 되는 요청 예시</h3>
               <div className="mt-4 space-y-3">
-                <div className="rounded-2xl bg-[#f7f3ec] p-4 text-sm leading-7 text-[var(--foreground)]">
+                <div className={noteCardClass}>
                   안녕하세요. 4월 27일 월요일, 여전도회 바자회가 여전도회관 동편 주차장에서
                   열립니다. 정성껏 준비한 먹거리와 따뜻한 만남이 기다리고
                   있습니다. 가족과 이웃과 함께 오셔서 기쁜 시간을 나누세요.
                   여러분을 반갑게 초대합니다.
                 </div>
-                <div className="rounded-2xl bg-[#f7f3ec] p-4 text-sm leading-7 text-[var(--foreground)]">
+                <div className={noteCardClass}>
                   따뜻하고 다정한 톤으로, 천천히 또렷하게 읽어줘. 중장년층이
                   편하게 들을 수 있도록 안정적인 속도로 자연스럽게 말해줘.
                 </div>
@@ -260,7 +289,7 @@ export default async function TaskDetail({
 
             <TaskThreeAudioAssistant />
 
-            <article className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--card-strong)] p-5">
+            <article className={softCardClass}>
               <h3 className="text-lg font-semibold">다음 단계로 가져갈 것</h3>
               <p className="mt-3 text-sm leading-7 text-[var(--muted)] sm:text-base">
                 가장 마음에 드는 오디오 파일 1개를 준비해두세요. 다음 단계에서는
@@ -270,7 +299,7 @@ export default async function TaskDetail({
           </div>
         ) : isFourthTask ? (
           <div className="mt-4 space-y-5">
-            <article className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--card-strong)] p-5">
+            <article className={softCardClass}>
               <h2 className="text-xl font-semibold">이번 과제에서 할 일</h2>
               <p className="mt-3 text-sm leading-7 text-[var(--muted)] sm:text-base">
                 앞에서 만든 대표 이미지와 대사를 참고 자료로 사용해 짧은 영상
@@ -281,7 +310,7 @@ export default async function TaskDetail({
             </article>
 
             <div className="grid gap-4 lg:grid-cols-2">
-              <article className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--card-strong)] p-5">
+              <article className={softCardClass}>
                 <h3 className="text-lg font-semibold">따라하기 순서</h3>
                 <ol className="mt-4 space-y-3 text-sm leading-6 text-[var(--muted)] sm:text-base">
                   <li>1. 2단계에서 만든 대표 이미지를 저장한 뒤 다시 업로드합니다.</li>
@@ -292,7 +321,7 @@ export default async function TaskDetail({
                 </ol>
               </article>
 
-              <article className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--card-strong)] p-5">
+              <article className={softCardClass}>
                 <h3 className="text-lg font-semibold">프롬프트에 넣으면 좋은 요소</h3>
                 <ul className="mt-4 space-y-3 text-sm leading-6 text-[var(--muted)] sm:text-base">
                   <li>카메라 움직임: 천천히 다가가기, 부드럽게 뒤로 빠지기</li>
@@ -303,15 +332,15 @@ export default async function TaskDetail({
               </article>
             </div>
 
-            <article className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--card-strong)] p-5">
+            <article className={softCardClass}>
               <h3 className="text-lg font-semibold">복사해서 바로 써도 되는 요청 예시</h3>
               <div className="mt-4 space-y-3">
-                <div className="rounded-2xl bg-[#f7f3ec] p-4 text-sm leading-7 text-[var(--foreground)]">
+                <div className={noteCardClass}>
                   대표 이미지의 분위기를 유지하면서 인물과 햇살이 아주 천천히
                   자연스럽게 움직이는 짧은 홍보 영상으로 만들어줘. 카메라는
                   부드럽게 앞으로 다가가고, 따뜻하고 환영하는 분위기를 유지해줘.
                 </div>
-                <div className="rounded-2xl bg-[#f7f3ec] p-4 text-sm leading-7 text-[var(--foreground)]">
+                <div className={noteCardClass}>
                   조용한 묵상 영상처럼 차분하게 움직여줘. 빛이 은은하게
                   흔들리고, 화면 전환 없이 한 장면 안에서 미세한 카메라 움직임만
                   들어가게 해줘.
@@ -321,7 +350,7 @@ export default async function TaskDetail({
 
             <TaskFourVideoAssistant />
 
-            <article className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--card-strong)] p-5">
+            <article className={softCardClass}>
               <h3 className="text-lg font-semibold">다음 단계로 가져갈 것</h3>
               <p className="mt-3 text-sm leading-7 text-[var(--muted)] sm:text-base">
                 가장 마음에 드는 영상 초안 1개를 저장해두세요. 마지막 단계에서는
@@ -343,16 +372,16 @@ export default async function TaskDetail({
         )}
       </section>
 
-      <nav className="flex items-center justify-between gap-3">
+      <nav className="task-shell-card flex items-center justify-between gap-3 rounded-[2rem] border px-4 py-4 sm:px-6">
         <Link
           href={prevHref}
-          className="inline-flex h-11 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--card)] px-5 text-sm font-semibold"
+          className="inline-flex h-11 items-center justify-center rounded-full border border-[var(--line)] bg-white/70 px-5 text-sm font-semibold backdrop-blur-sm"
         >
           이전으로
         </Link>
         <Link
           href={nextHref}
-          className="inline-flex h-11 items-center justify-center rounded-full bg-[var(--accent)] px-5 text-sm font-semibold text-white"
+          className="inline-flex h-11 items-center justify-center rounded-full bg-[var(--accent)] px-5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(37,99,235,0.24)]"
         >
           다음 단계
         </Link>

@@ -45,3 +45,241 @@ a {
 button {
   font: inherit;
 }
+
+.task-stage-shell {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(93, 74, 46, 0.08);
+  border-radius: 2rem;
+  isolation: isolate;
+}
+
+.task-stage-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  opacity: 0.98;
+}
+
+.task-stage-shell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.task-shell-card {
+  background: rgba(255, 252, 247, 0.78);
+  border-color: rgba(84, 66, 41, 0.12);
+  backdrop-filter: blur(10px);
+}
+
+.task-soft-panel {
+  background: rgba(255, 253, 249, 0.82);
+  border-color: rgba(84, 66, 41, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.task-note-panel {
+  background: rgba(248, 243, 236, 0.94);
+  border: 1px solid rgba(120, 91, 51, 0.1);
+}
+
+.task-theme-chip {
+  color: rgba(54, 39, 23, 0.92);
+  border: 1px solid rgba(86, 62, 35, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.task-theme-1::before {
+  background:
+    linear-gradient(125deg, rgba(214, 172, 112, 0.4), transparent 30%),
+    radial-gradient(circle at 18% 16%, rgba(255, 245, 222, 0.78), transparent 18%),
+    linear-gradient(180deg, #d8be93 0%, #ead7b7 32%, #f4ead7 100%);
+}
+
+.task-theme-1::after {
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 29px,
+      rgba(169, 128, 73, 0.11) 29px 30px
+    ),
+    radial-gradient(circle at 85% 12%, rgba(173, 118, 47, 0.16), transparent 15%),
+    radial-gradient(circle at 12% 78%, rgba(139, 96, 39, 0.1), transparent 18%);
+}
+
+.task-theme-1 .task-hero-card {
+  background:
+    linear-gradient(180deg, rgba(255, 249, 238, 0.96), rgba(249, 242, 227, 0.9)),
+    linear-gradient(90deg, rgba(181, 134, 78, 0.16), transparent 14%);
+}
+
+.task-theme-1 .task-theme-chip {
+  background:
+    linear-gradient(180deg, rgba(238, 217, 182, 0.95), rgba(228, 203, 162, 0.92));
+}
+
+.task-theme-1 .task-note-panel {
+  background:
+    linear-gradient(180deg, rgba(248, 240, 223, 0.98), rgba(243, 233, 211, 0.96));
+}
+
+.task-theme-2::before {
+  background:
+    radial-gradient(circle at 18% 14%, rgba(255, 255, 255, 0.6), transparent 15%),
+    linear-gradient(180deg, #cdd9df 0%, #e4ddd1 38%, #f5efe6 100%);
+}
+
+.task-theme-2::after {
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(128, 112, 84, 0.07) 0 8px,
+      rgba(255, 255, 255, 0.06) 8px 16px
+    ),
+    radial-gradient(circle at 82% 18%, rgba(119, 156, 187, 0.18), transparent 18%),
+    linear-gradient(90deg, rgba(120, 92, 58, 0.08), transparent 18%);
+}
+
+.task-theme-2 .task-hero-card {
+  background:
+    linear-gradient(180deg, rgba(253, 250, 244, 0.92), rgba(245, 241, 233, 0.9));
+}
+
+.task-theme-2 .task-theme-chip {
+  background:
+    linear-gradient(180deg, rgba(226, 233, 237, 0.94), rgba(209, 219, 224, 0.92));
+}
+
+.task-theme-2 .task-note-panel {
+  background:
+    linear-gradient(180deg, rgba(249, 244, 234, 0.98), rgba(239, 232, 220, 0.95));
+}
+
+.task-theme-3 {
+  color: #f9f5f0;
+}
+
+.task-theme-3::before {
+  background:
+    radial-gradient(circle at 82% 14%, rgba(255, 65, 98, 0.24), transparent 18%),
+    radial-gradient(circle at 20% 24%, rgba(74, 133, 255, 0.16), transparent 20%),
+    linear-gradient(180deg, #09111f 0%, #121a2f 48%, #231422 100%);
+}
+
+.task-theme-3::after {
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.03) 0 18px,
+      rgba(0, 0, 0, 0.04) 18px 36px
+    ),
+    linear-gradient(90deg, rgba(255, 68, 102, 0.12), transparent 16% 84%, rgba(96, 73, 255, 0.12));
+}
+
+.task-theme-3 .task-shell-card,
+.task-theme-3 .task-soft-panel {
+  background: rgba(10, 16, 30, 0.72);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #f8f2ea;
+}
+
+.task-theme-3 .task-hero-card {
+  background:
+    linear-gradient(180deg, rgba(12, 18, 33, 0.86), rgba(18, 25, 46, 0.82));
+}
+
+.task-theme-3 .task-theme-chip {
+  background:
+    linear-gradient(180deg, rgba(255, 80, 108, 0.24), rgba(43, 71, 146, 0.28));
+  color: #fff2f4;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.task-theme-3 .task-note-panel {
+  background: rgba(27, 35, 54, 0.9);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.task-theme-3 :is(p, li, span, h1, h2, h3) {
+  color: inherit;
+}
+
+.task-theme-4 {
+  color: #fbf4eb;
+}
+
+.task-theme-4::before {
+  background:
+    radial-gradient(circle at 50% 12%, rgba(255, 228, 154, 0.24), transparent 16%),
+    linear-gradient(90deg, #4c0810 0%, #7a1122 18%, #5b0d19 36%, #7a1122 54%, #4c0810 72%, #7a1122 100%),
+    linear-gradient(180deg, #14060b 0%, #2a0a13 100%);
+}
+
+.task-theme-4::after {
+  background:
+    radial-gradient(circle at 50% 16%, rgba(255, 217, 112, 0.18), transparent 18%),
+    linear-gradient(180deg, transparent 0 68%, rgba(10, 7, 10, 0.45) 100%);
+}
+
+.task-theme-4 .task-shell-card,
+.task-theme-4 .task-soft-panel {
+  background: rgba(34, 10, 18, 0.72);
+  border-color: rgba(255, 234, 210, 0.08);
+  color: #fff3e8;
+}
+
+.task-theme-4 .task-hero-card {
+  background:
+    linear-gradient(180deg, rgba(54, 14, 25, 0.82), rgba(35, 12, 21, 0.8));
+}
+
+.task-theme-4 .task-theme-chip {
+  background:
+    linear-gradient(180deg, rgba(152, 29, 46, 0.42), rgba(87, 14, 29, 0.5));
+  color: #fff5ea;
+  border-color: rgba(255, 224, 192, 0.12);
+}
+
+.task-theme-4 .task-note-panel {
+  background: rgba(69, 21, 33, 0.86);
+  border-color: rgba(255, 232, 202, 0.08);
+}
+
+.task-theme-4 :is(p, li, span, h1, h2, h3) {
+  color: inherit;
+}
+
+.task-theme-5::before {
+  background:
+    radial-gradient(circle at 20% 18%, rgba(255, 255, 255, 0.56), transparent 16%),
+    radial-gradient(circle at 82% 10%, rgba(150, 213, 255, 0.38), transparent 16%),
+    linear-gradient(135deg, #dceeff 0%, #efe8ff 38%, #e5f5f2 100%);
+}
+
+.task-theme-5::after {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.32), transparent 40%),
+    radial-gradient(circle at 72% 24%, rgba(255, 255, 255, 0.3), transparent 18%);
+}
+
+.task-theme-5 .task-shell-card,
+.task-theme-5 .task-soft-panel,
+.task-theme-5 .task-note-panel,
+.task-theme-5 .task-theme-chip {
+  background: rgba(255, 255, 255, 0.34);
+  border-color: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(18px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.42),
+    0 18px 40px rgba(121, 146, 184, 0.16);
+}
+
+@media (max-width: 640px) {
+  .task-stage-shell {
+    border-radius: 1.5rem;
+  }
+}

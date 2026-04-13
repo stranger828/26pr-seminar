@@ -50,15 +50,22 @@ export default function TaskFourVideoAssistant() {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result;
-      if (typeof result === "string") {
-        setImageDataUrl(result);
-        setImageName(file.name);
-      }
-    };
-    reader.readAsDataURL(file);
+    try {
+      const originalDataUrl = await readFileAsDataUrl(file);
+      const normalizedDataUrl = await normalizeImageForVideo(originalDataUrl);
+
+      setImageDataUrl(normalizedDataUrl);
+      setImageName(file.name);
+      setError("");
+    } catch (fileError) {
+      setImageDataUrl("");
+      setImageName("");
+      setError(
+        fileError instanceof Error
+          ? fileError.message
+          : "이미지 파일을 읽지 못했습니다.",
+      );
+    }
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -406,4 +413,66 @@ export default function TaskFourVideoAssistant() {
 
 function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function readFileAsDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        resolve(reader.result);
+        return;
+      }
+
+      reject(new Error("이미지 파일을 읽지 못했습니다."));
+    };
+
+    reader.onerror = () => {
+      reject(new Error("이미지 파일을 읽지 못했습니다."));
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
+function normalizeImageForVideo(dataUrl: string) {
+  return new Promise<string>((resolve, reject) => {
+    const image = new window.Image();
+
+    image.onload = () => {
+      const width = 1280;
+      const height = 720;
+      const canvas = document.createElement("canvas");
+
+      canvas.width = width;
+      canvas.height = height;
+
+      const context = canvas.getContext("2d");
+
+      if (!context) {
+        reject(new Error("영상용 이미지를 준비하지 못했습니다."));
+        return;
+      }
+
+      context.fillStyle = "#f4efe6";
+      context.fillRect(0, 0, width, height);
+
+      const scale = Math.max(width / image.width, height / image.height);
+      const drawWidth = image.width * scale;
+      const drawHeight = image.height * scale;
+      const offsetX = (width - drawWidth) / 2;
+      const offsetY = (height - drawHeight) / 2;
+
+      context.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
+
+      resolve(canvas.toDataURL("image/png"));
+    };
+
+    image.onerror = () => {
+      reject(new Error("업로드한 이미지를 열지 못했습니다."));
+    };
+
+    image.src = dataUrl;
+  });
 }

@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GenerateVideosOperation, GoogleGenAI } from "@google/genai";
 import { NextResponse } from "next/server";
 import { execFile } from "node:child_process";
 import { promises as fs } from "node:fs";
@@ -46,7 +46,7 @@ type JobPollResult =
 const execFileAsync = promisify(execFile);
 
 export async function POST(request: Request) {
-  const { provider = "openai", script, motionPrompt, imageDataUrl } =
+  const { provider = "gemini", script, motionPrompt, imageDataUrl } =
     (await request.json()) as {
       provider?: Provider;
       script?: string;
@@ -375,10 +375,11 @@ async function getGeminiJobResult(externalJobId: string): Promise<JobPollResult>
   }
 
   const ai = new GoogleGenAI({ apiKey });
+  const operationRef = new GenerateVideosOperation();
+  operationRef.name = externalJobId;
+
   const operation = await ai.operations.getVideosOperation({
-    operation: { name: externalJobId } as Parameters<
-      typeof ai.operations.getVideosOperation
-    >[0]["operation"],
+    operation: operationRef,
   });
 
   if (!operation.done) {

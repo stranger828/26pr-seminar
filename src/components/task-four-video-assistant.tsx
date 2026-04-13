@@ -6,8 +6,8 @@ import GalleryButton from "@/components/gallery-button";
 import { useMemo, useState } from "react";
 
 const providers = [
-  { id: "openai", label: "OpenAI" },
   { id: "gemini", label: "Gemini" },
+  { id: "openai", label: "OpenAI" },
 ] as const;
 
 const scriptPresets = [
@@ -25,7 +25,7 @@ const motionPresets = [
 type Provider = (typeof providers)[number]["id"];
 
 export default function TaskFourVideoAssistant() {
-  const [provider, setProvider] = useState<Provider>("openai");
+  const [provider, setProvider] = useState<Provider>("gemini");
   const [script, setScript] = useState<string>(scriptPresets[0]);
   const [motionPrompt, setMotionPrompt] = useState<string>(motionPresets[0]);
   const [imageDataUrl, setImageDataUrl] = useState("");

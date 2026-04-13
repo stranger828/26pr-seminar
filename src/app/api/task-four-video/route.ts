@@ -398,13 +398,23 @@ async function getGeminiJobResult(externalJobId: string): Promise<JobPollResult>
   }
 
   if (video?.uri) {
-    const downloadResponse = await fetch(video.uri);
+    const downloadUrl = new URL(video.uri);
+
+    if (!downloadUrl.searchParams.has("key")) {
+      downloadUrl.searchParams.set("key", apiKey);
+    }
+
+    const downloadResponse = await fetch(downloadUrl.toString(), {
+      headers: {
+        "x-goog-api-key": apiKey,
+      },
+    });
 
     if (!downloadResponse.ok) {
       return {
         status: "failed",
         provider: "gemini",
-        error: "Gemini 생성 영상을 다운로드하지 못했습니다.",
+        error: `Gemini 생성 영상을 다운로드하지 못했습니다. (${downloadResponse.status})`,
       };
     }
 

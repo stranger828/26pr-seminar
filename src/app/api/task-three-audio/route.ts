@@ -40,24 +40,36 @@ export async function POST(request: Request) {
         ? await generateWithGemini(script, styleGuide, gender, age, tone)
         : await generateWithOpenAI(script, styleGuide, gender, age, tone);
 
-    const galleryItem = await saveDataUrlGalleryItem({
-      taskStep: "3",
-      provider,
-      prompt: script,
-      secondaryPrompt: [
-        `성별 느낌: ${gender}`,
-        `연령대 느낌: ${age}`,
-        `톤: ${tone}`,
-        `말투 가이드: ${styleGuide || "기본"}`,
-      ].join("\n"),
-      dataUrl: result.audioDataUrl,
-      type: "audio",
-    });
+    let galleryItem = null;
+    let galleryWarning: string | undefined;
+
+    try {
+      galleryItem = await saveDataUrlGalleryItem({
+        taskStep: "3",
+        provider,
+        prompt: script,
+        secondaryPrompt: [
+          `성별 느낌: ${gender}`,
+          `연령대 느낌: ${age}`,
+          `톤: ${tone}`,
+          `말투 가이드: ${styleGuide || "기본"}`,
+        ].join("\n"),
+        dataUrl: result.audioDataUrl,
+        type: "audio",
+      });
+    } catch (galleryError) {
+      console.error("Failed to save task 3 gallery item:", galleryError);
+      galleryWarning =
+        galleryError instanceof Error
+          ? galleryError.message
+          : "갤러리 저장에 실패했습니다.";
+    }
 
     return NextResponse.json({
       ...result,
-      savedAssetUrl: galleryItem.assetUrl,
+      savedAssetUrl: galleryItem?.assetUrl,
       galleryItem,
+      galleryWarning,
     });
   } catch (error) {
     return NextResponse.json(

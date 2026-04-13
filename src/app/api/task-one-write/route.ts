@@ -77,14 +77,25 @@ export async function POST(request: Request) {
         ? await generateWithGemini(prompt)
         : await generateWithOpenAI(prompt);
 
-    const galleryItem = await saveTextGalleryItem({
-      taskStep: "1",
-      provider,
-      prompt,
-      resultText: reply,
-    });
+    let galleryItem = null;
+    let galleryWarning: string | undefined;
 
-    return NextResponse.json({ reply, galleryItem });
+    try {
+      galleryItem = await saveTextGalleryItem({
+        taskStep: "1",
+        provider,
+        prompt,
+        resultText: reply,
+      });
+    } catch (galleryError) {
+      console.error("Failed to save task 1 gallery item:", galleryError);
+      galleryWarning =
+        galleryError instanceof Error
+          ? galleryError.message
+          : "갤러리 저장에 실패했습니다.";
+    }
+
+    return NextResponse.json({ reply, galleryItem, galleryWarning });
   } catch (error) {
     return NextResponse.json(
       {

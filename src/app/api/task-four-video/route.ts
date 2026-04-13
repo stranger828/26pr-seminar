@@ -158,22 +158,34 @@ export async function GET(request: Request) {
       throw new Error("영상 완료 상태를 확인하지 못했습니다.");
     }
 
-    const galleryItem = await saveBinaryGalleryItem({
-      taskStep: "4",
-      provider: result.provider,
-      externalJobId: job.externalJobId,
-      prompt: job.motionPrompt,
-      secondaryPrompt: job.script,
-      bytes: result.bytes,
-      mimeType: result.mimeType,
-      type: "video",
-    });
+    let galleryItem = null;
+    let galleryWarning: string | undefined;
+
+    try {
+      galleryItem = await saveBinaryGalleryItem({
+        taskStep: "4",
+        provider: result.provider,
+        externalJobId: job.externalJobId,
+        prompt: job.motionPrompt,
+        secondaryPrompt: job.script,
+        bytes: result.bytes,
+        mimeType: result.mimeType,
+        type: "video",
+      });
+    } catch (galleryError) {
+      console.error("Failed to save task 4 gallery item:", galleryError);
+      galleryWarning =
+        galleryError instanceof Error
+          ? galleryError.message
+          : "갤러리 저장에 실패했습니다.";
+    }
 
     return NextResponse.json({
       status: "completed",
       provider: result.provider,
-      videoUrl: galleryItem.assetUrl,
+      videoUrl: galleryItem?.assetUrl,
       galleryItem,
+      galleryWarning,
     });
   } catch (error) {
     return NextResponse.json(

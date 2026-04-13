@@ -26,19 +26,31 @@ export async function POST(request: Request) {
         ? await generateWithGemini(enhancedPrompt)
         : await generateWithOpenAI(enhancedPrompt);
 
-    const galleryItem = await saveDataUrlGalleryItem({
-      taskStep: "2",
-      provider,
-      prompt,
-      secondaryPrompt: enhancedPrompt,
-      dataUrl: imageDataUrl,
-      type: "image",
-    });
+    let galleryItem = null;
+    let galleryWarning: string | undefined;
+
+    try {
+      galleryItem = await saveDataUrlGalleryItem({
+        taskStep: "2",
+        provider,
+        prompt,
+        secondaryPrompt: enhancedPrompt,
+        dataUrl: imageDataUrl,
+        type: "image",
+      });
+    } catch (galleryError) {
+      console.error("Failed to save task 2 gallery item:", galleryError);
+      galleryWarning =
+        galleryError instanceof Error
+          ? galleryError.message
+          : "갤러리 저장에 실패했습니다.";
+    }
 
     return NextResponse.json({
       imageDataUrl,
-      savedAssetUrl: galleryItem.assetUrl,
+      savedAssetUrl: galleryItem?.assetUrl,
       galleryItem,
+      galleryWarning,
     });
   } catch (error) {
     return NextResponse.json(

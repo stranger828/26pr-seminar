@@ -45,3 +45,10 @@ This project is configured for Next.js deployment on Vercel.
 2. Copy `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` into `.env.local`.
 3. Optionally change `SUPABASE_GALLERY_BUCKET` if you want a different bucket name.
 4. Restart the Next.js server after updating environment variables.
+5. Run `npm run verify:supabase` to confirm table read/write, storage upload, public URL generation, and cleanup all succeed.
+
+### Verification Notes
+
+- `SUPABASE_SERVICE_ROLE_KEY` must be the server-side service role key, not the anon key.
+- If you change `SUPABASE_GALLERY_BUCKET`, create the same bucket name in Supabase before verification.
+- The verification script inserts one temporary probe row and one temporary probe file, then deletes both immediately after the check.

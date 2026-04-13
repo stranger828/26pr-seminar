@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "verify:supabase": "node --env-file=.env.local scripts/verify-supabase-gallery.mjs"
   },
   "dependencies": {
     "@google/genai": "^1.49.0",

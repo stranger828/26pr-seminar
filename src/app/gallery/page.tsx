@@ -2,6 +2,8 @@ import Link from "next/link";
 import GalleryBoard from "@/components/gallery-board";
 import { listGalleryItems } from "@/lib/gallery-store";
 
+export const dynamic = "force-dynamic";
+
 export default async function GalleryPage() {
   const items = await listGalleryItems();
 

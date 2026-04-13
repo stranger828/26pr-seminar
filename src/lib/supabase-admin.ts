@@ -1,6 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-let cachedClient: SupabaseClient<any> | null = null;
+let cachedClient: SupabaseClient | null = null;
 
 export function hasSupabaseConfig() {
   return Boolean(
@@ -22,7 +22,7 @@ export function getSupabaseAdmin() {
     );
   }
 
-  cachedClient = createClient<any>(url, serviceRoleKey, {
+  cachedClient = createClient(url, serviceRoleKey, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,

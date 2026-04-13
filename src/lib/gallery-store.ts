@@ -11,6 +11,7 @@ export type GalleryItem = {
   taskTitle: string;
   type: GalleryItemType;
   provider: "openai" | "gemini";
+  externalJobId?: string;
   prompt: string;
   secondaryPrompt?: string;
   resultText?: string;
@@ -87,12 +88,27 @@ export async function saveDataUrlGalleryItem(input: {
 export async function saveBinaryGalleryItem(input: {
   taskStep: GalleryTaskStep;
   provider: "openai" | "gemini";
+  externalJobId?: string;
   prompt: string;
   secondaryPrompt?: string;
   bytes: Buffer;
   mimeType: string;
   type: "video";
 }) {
+  const items = await listGalleryItems();
+  const existingItem = input.externalJobId
+    ? items.find(
+        (item) =>
+          item.type === "video" &&
+          item.provider === input.provider &&
+          item.externalJobId === input.externalJobId,
+      )
+    : undefined;
+
+  if (existingItem) {
+    return existingItem;
+  }
+
   const extension = extensionForMimeType(input.mimeType);
   const fileName = buildFileName(input.taskStep, input.provider, extension);
   const folderPath = path.join(assetsRootDir, `task-${input.taskStep}`);
@@ -105,6 +121,7 @@ export async function saveBinaryGalleryItem(input: {
     taskTitle: taskTitles[input.taskStep],
     type: input.type,
     provider: input.provider,
+    externalJobId: input.externalJobId,
     prompt: input.prompt.trim(),
     secondaryPrompt: input.secondaryPrompt?.trim() || undefined,
     assetUrl: `/gallery-assets/task-${input.taskStep}/${fileName}`,

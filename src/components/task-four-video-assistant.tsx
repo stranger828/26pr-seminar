@@ -32,6 +32,7 @@ export default function TaskFourVideoAssistant() {
   const [imageName, setImageName] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
   const [error, setError] = useState("");
 
   const canSubmit = useMemo(
@@ -72,11 +73,11 @@ export default function TaskFourVideoAssistant() {
 
     setIsLoading(true);
     setError("");
-
     setVideoUrl("");
+    setStatusMessage("영상 생성을 시작하는 중입니다...");
 
     try {
-      const response = await fetch("/api/task-four-video", {
+      const startResponse = await fetch("/api/task-four-video", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -89,30 +90,78 @@ export default function TaskFourVideoAssistant() {
         }),
       });
 
-      if (!response.ok) {
-        const data = (await response.json()) as { error?: string };
+      if (!startResponse.ok) {
+        const data = (await startResponse.json()) as { error?: string };
         throw new Error(data.error || "영상 생성에 실패했습니다.");
       }
 
-      const data = (await response.json()) as {
-        videoUrl?: string;
+      const startData = (await startResponse.json()) as {
+        jobToken?: string;
+        message?: string;
         error?: string;
       };
 
-      if (!data.videoUrl) {
-        throw new Error(data.error || "영상 생성에 실패했습니다.");
+      if (!startData.jobToken) {
+        throw new Error(startData.error || "영상 생성 작업을 시작하지 못했습니다.");
       }
 
-      setVideoUrl(data.videoUrl);
+      setStatusMessage(
+        startData.message || "영상 생성을 시작했습니다. 잠시만 기다려주세요.",
+      );
+
+      await pollVideoResult(startData.jobToken);
     } catch (submitError) {
       setError(
         submitError instanceof Error
           ? submitError.message
           : "영상 생성 중 오류가 발생했습니다.",
       );
+      setStatusMessage("");
     } finally {
       setIsLoading(false);
     }
+  }
+
+  async function pollVideoResult(jobToken: string) {
+    for (let attempt = 0; attempt < 120; attempt += 1) {
+      await wait(5000);
+
+      const response = await fetch(
+        `/api/task-four-video?job=${encodeURIComponent(jobToken)}`,
+        {
+          cache: "no-store",
+        },
+      );
+
+      const data = (await response.json()) as {
+        status?: "queued" | "processing" | "completed" | "failed";
+        videoUrl?: string;
+        message?: string;
+        error?: string;
+      };
+
+      if (!response.ok) {
+        throw new Error(data.error || "영상 상태를 확인하지 못했습니다.");
+      }
+
+      if (data.status === "completed" && data.videoUrl) {
+        setVideoUrl(data.videoUrl);
+        setStatusMessage("영상 생성이 완료되었습니다.");
+        return;
+      }
+
+      if (data.status === "failed") {
+        throw new Error(data.error || "영상 생성에 실패했습니다.");
+      }
+
+      setStatusMessage(
+        data.message || "영상을 생성 중입니다. 잠시만 기다려주세요.",
+      );
+    }
+
+    throw new Error(
+      "영상 생성 시간이 오래 걸리고 있습니다. 잠시 후 다시 상태를 확인해주세요.",
+    );
   }
 
   function buildDownloadName() {
@@ -254,6 +303,12 @@ export default function TaskFourVideoAssistant() {
             영상 생성은 보통 수십 초에서 몇 분 정도 걸릴 수 있습니다.
           </p>
         </div>
+
+        {statusMessage ? (
+          <div className="rounded-[1.25rem] border border-[var(--line)] bg-[#f8f5ef] px-4 py-3 text-sm leading-6 text-[var(--muted)]">
+            {statusMessage}
+          </div>
+        ) : null}
       </form>
 
       {error ? (
@@ -347,4 +402,8 @@ export default function TaskFourVideoAssistant() {
       <GalleryButton />
     </section>
   );
+}
+
+function wait(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

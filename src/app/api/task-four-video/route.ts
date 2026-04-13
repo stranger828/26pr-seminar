@@ -9,8 +9,40 @@ import { saveBinaryGalleryItem } from "@/lib/gallery-store";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
+export const dynamic = "force-dynamic";
 
 type Provider = "openai" | "gemini";
+
+type VideoJobToken = {
+  provider: Provider;
+  externalJobId: string;
+  script: string;
+  motionPrompt: string;
+};
+
+type JobStartResult = {
+  externalJobId: string;
+  provider: Provider;
+  status: "queued" | "processing";
+};
+
+type JobPollResult =
+  | {
+      status: "queued" | "processing";
+      provider: Provider;
+    }
+  | {
+      status: "failed";
+      provider: Provider;
+      error: string;
+    }
+  | {
+      status: "completed";
+      provider: Provider;
+      bytes: Buffer;
+      mimeType: string;
+    };
+
 const execFileAsync = promisify(execFile);
 
 export async function POST(request: Request) {
@@ -46,23 +78,24 @@ export async function POST(request: Request) {
   try {
     const image = parseDataUrl(imageDataUrl);
     const prompt = buildVideoPrompt(script, motionPrompt);
-    const videoBytes =
+    const job =
       provider === "gemini"
-        ? await generateWithGemini(prompt, image)
-        : await generateWithOpenAI(prompt, image);
-    const galleryItem = await saveBinaryGalleryItem({
-      taskStep: "4",
-      provider,
-      prompt: motionPrompt,
-      secondaryPrompt: script,
-      bytes: videoBytes,
-      mimeType: "video/mp4",
-      type: "video",
+        ? await startGeminiJob(prompt, image)
+        : await startOpenAIJob(prompt, image);
+
+    const jobToken = encodeJobToken({
+      provider: job.provider,
+      externalJobId: job.externalJobId,
+      script: script.trim(),
+      motionPrompt: motionPrompt.trim(),
     });
 
     return NextResponse.json({
-      videoUrl: galleryItem.assetUrl,
-      galleryItem,
+      status: job.status,
+      provider: job.provider,
+      jobToken,
+      message:
+        "영상 생성을 시작했습니다. 잠시 뒤 자동으로 상태를 확인합니다.",
     });
   } catch (error) {
     return NextResponse.json(
@@ -70,17 +103,96 @@ export async function POST(request: Request) {
         error:
           error instanceof Error
             ? error.message
-            : "영상 생성에 실패했습니다.",
+            : "영상 생성을 시작하지 못했습니다.",
       },
       { status: 500 },
     );
   }
 }
 
-async function generateWithOpenAI(
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const jobToken = searchParams.get("job");
+
+  if (!jobToken) {
+    return NextResponse.json(
+      { error: "조회할 작업 정보가 없습니다." },
+      { status: 400 },
+    );
+  }
+
+  let job: VideoJobToken;
+
+  try {
+    job = decodeJobToken(jobToken);
+  } catch {
+    return NextResponse.json(
+      { error: "작업 정보를 읽지 못했습니다." },
+      { status: 400 },
+    );
+  }
+
+  try {
+    const result =
+      job.provider === "gemini"
+        ? await getGeminiJobResult(job.externalJobId)
+        : await getOpenAIJobResult(job.externalJobId);
+
+    if (result.status === "queued" || result.status === "processing") {
+      return NextResponse.json({
+        status: result.status,
+        provider: result.provider,
+        message: "영상을 생성 중입니다. 잠시만 기다려주세요.",
+      });
+    }
+
+    if (result.status === "failed") {
+      return NextResponse.json({
+        status: result.status,
+        provider: result.provider,
+        error: result.error,
+      });
+    }
+
+    if (result.status !== "completed") {
+      throw new Error("영상 완료 상태를 확인하지 못했습니다.");
+    }
+
+    const galleryItem = await saveBinaryGalleryItem({
+      taskStep: "4",
+      provider: result.provider,
+      externalJobId: job.externalJobId,
+      prompt: job.motionPrompt,
+      secondaryPrompt: job.script,
+      bytes: result.bytes,
+      mimeType: result.mimeType,
+      type: "video",
+    });
+
+    return NextResponse.json({
+      status: "completed",
+      provider: result.provider,
+      videoUrl: galleryItem.assetUrl,
+      galleryItem,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        status: "failed",
+        error:
+          error instanceof Error
+            ? error.message
+            : "영상 상태를 확인하지 못했습니다.",
+      },
+      { status: 500 },
+    );
+  }
+}
+
+async function startOpenAIJob(
   prompt: string,
   image: { mimeType: string; bytes: Buffer },
-) {
+): Promise<JobStartResult> {
   const apiKey = process.env.OPENAI_API_KEY;
   const model = process.env.OPENAI_VIDEO_MODEL || "sora-2";
 
@@ -124,48 +236,63 @@ async function generateWithOpenAI(
     );
   }
 
-  let status = createData.status || "queued";
-  const videoId = createData.id;
-  const startedAt = Date.now();
+  return {
+    externalJobId: createData.id,
+    provider: "openai",
+    status:
+      createData.status === "succeeded" ? "processing" : mapPendingStatus(createData.status),
+  };
+}
 
-  while (status === "queued" || status === "in_progress") {
-    if (Date.now() - startedAt > 8 * 60 * 1000) {
-      throw new Error("OpenAI 영상 생성 시간이 너무 오래 걸려 중단했습니다.");
-    }
+async function getOpenAIJobResult(externalJobId: string): Promise<JobPollResult> {
+  const apiKey = process.env.OPENAI_API_KEY;
 
-    await wait(5000);
-
-    const retrieveResponse = await fetch(
-      `https://api.openai.com/v1/videos/${videoId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-        },
-      },
+  if (!apiKey) {
+    throw new Error(
+      "OPENAI_API_KEY가 설정되지 않았습니다. .env.local 파일에 API 키를 넣어주세요.",
     );
+  }
 
-    const retrieveData = (await retrieveResponse.json()) as {
-      status?: string;
-      error?: { message?: string };
+  const retrieveResponse = await fetch(
+    `https://api.openai.com/v1/videos/${externalJobId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+      },
+    },
+  );
+
+  const retrieveData = (await retrieveResponse.json()) as {
+    status?: string;
+    error?: { message?: string };
+  };
+
+  if (!retrieveResponse.ok) {
+    throw new Error(
+      retrieveData.error?.message || "OpenAI 영상 상태를 확인하지 못했습니다.",
+    );
+  }
+
+  const status = retrieveData.status || "failed";
+
+  if (status === "queued") {
+    return { status: "queued", provider: "openai" };
+  }
+
+  if (status === "in_progress") {
+    return { status: "processing", provider: "openai" };
+  }
+
+  if (status === "failed" || status === "cancelled") {
+    return {
+      status: "failed",
+      provider: "openai",
+      error: retrieveData.error?.message || "OpenAI 영상 생성이 실패했습니다.",
     };
-
-    if (!retrieveResponse.ok) {
-      throw new Error(
-        retrieveData.error?.message || "OpenAI 영상 상태를 확인하지 못했습니다.",
-      );
-    }
-
-    status = retrieveData.status || "failed";
-
-    if (status === "failed") {
-      throw new Error(
-        retrieveData.error?.message || "OpenAI 영상 생성이 실패했습니다.",
-      );
-    }
   }
 
   const contentResponse = await fetch(
-    `https://api.openai.com/v1/videos/${videoId}/content`,
+    `https://api.openai.com/v1/videos/${externalJobId}/content`,
     {
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -177,13 +304,18 @@ async function generateWithOpenAI(
     throw new Error("OpenAI 생성 영상을 다운로드하지 못했습니다.");
   }
 
-  return Buffer.from(await contentResponse.arrayBuffer());
+  return {
+    status: "completed",
+    provider: "openai",
+    bytes: Buffer.from(await contentResponse.arrayBuffer()),
+    mimeType: "video/mp4",
+  };
 }
 
-async function generateWithGemini(
+async function startGeminiJob(
   prompt: string,
   image: { mimeType: string; bytes: Buffer },
-) {
+): Promise<JobStartResult> {
   const apiKey = process.env.GEMINI_API_KEY;
   const model = process.env.GEMINI_VIDEO_MODEL || "veo-3.1-generate-preview";
 
@@ -194,8 +326,7 @@ async function generateWithGemini(
   }
 
   const ai = new GoogleGenAI({ apiKey });
-
-  let operation = await ai.models.generateVideos({
+  const operation = await ai.models.generateVideos({
     model,
     prompt,
     image: {
@@ -211,25 +342,53 @@ async function generateWithGemini(
     },
   });
 
-  const startedAt = Date.now();
-
-  while (!operation.done) {
-    if (Date.now() - startedAt > 8 * 60 * 1000) {
-      throw new Error("Gemini 영상 생성 시간이 너무 오래 걸려 중단했습니다.");
-    }
-
-    await wait(10000);
-    operation = await ai.operations.getVideosOperation({ operation });
+  if (!operation.name) {
+    throw new Error("Gemini 영상 작업 정보를 받지 못했습니다.");
   }
 
-  const videoFile = operation.response?.generatedVideos?.[0]?.video;
-  const inlineBytes = videoFile?.videoBytes;
+  return {
+    externalJobId: operation.name,
+    provider: "gemini",
+    status: operation.done ? "processing" : "queued",
+  };
+}
 
-  if (!inlineBytes) {
-    throw new Error("Gemini 영상 응답에서 결과 파일을 찾지 못했습니다.");
+async function getGeminiJobResult(externalJobId: string): Promise<JobPollResult> {
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  if (!apiKey) {
+    throw new Error(
+      "GEMINI_API_KEY가 설정되지 않았습니다. .env.local 파일에 API 키를 넣어주세요.",
+    );
   }
 
-  return Buffer.from(inlineBytes, "base64");
+  const ai = new GoogleGenAI({ apiKey });
+  const operation = await ai.operations.getVideosOperation({
+    operation: { name: externalJobId } as Parameters<
+      typeof ai.operations.getVideosOperation
+    >[0]["operation"],
+  });
+
+  if (!operation.done) {
+    return { status: "processing", provider: "gemini" };
+  }
+
+  const video = operation.response?.generatedVideos?.[0]?.video;
+
+  if (!video?.videoBytes) {
+    return {
+      status: "failed",
+      provider: "gemini",
+      error: "Gemini 영상 응답에서 결과 파일을 찾지 못했습니다.",
+    };
+  }
+
+  return {
+    status: "completed",
+    provider: "gemini",
+    bytes: Buffer.from(video.videoBytes, "base64"),
+    mimeType: video.mimeType || "video/mp4",
+  };
 }
 
 function buildVideoPrompt(script: string, motionPrompt: string) {
@@ -259,6 +418,20 @@ function parseDataUrl(dataUrl: string) {
     mimeType: match[1],
     bytes: Buffer.from(match[2], "base64"),
   };
+}
+
+function encodeJobToken(job: VideoJobToken) {
+  return Buffer.from(JSON.stringify(job), "utf8").toString("base64url");
+}
+
+function decodeJobToken(jobToken: string) {
+  return JSON.parse(
+    Buffer.from(jobToken, "base64url").toString("utf8"),
+  ) as VideoJobToken;
+}
+
+function mapPendingStatus(status?: string) {
+  return status === "in_progress" ? "processing" : "queued";
 }
 
 function extensionForMime(mimeType: string) {
@@ -308,8 +481,4 @@ async function normalizeImageForOpenAI(image: {
   } finally {
     await fs.rm(tmpDir, { recursive: true, force: true });
   }
-}
-
-function wait(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }

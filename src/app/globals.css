@@ -231,6 +231,7 @@ button {
 .task-theme-3 .task-note-panel {
   background: rgba(27, 35, 54, 0.9);
   border-color: rgba(255, 255, 255, 0.08);
+  color: #f8f2ea;
 }
 
 .task-theme-3 :is(p, li, span, h1, h2, h3) {
@@ -269,6 +270,7 @@ button {
 .task-theme-4 .task-note-panel {
   background: rgba(69, 21, 33, 0.86);
   border-color: rgba(255, 232, 202, 0.08);
+  color: #fff3e8;
 }
 
 .task-theme-4 :is(p, li, span, h1, h2, h3) {

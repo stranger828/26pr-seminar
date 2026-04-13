@@ -63,8 +63,7 @@ export default async function TaskDetail({
   const sectionClass =
     "task-shell-card rounded-[2rem] border px-5 py-6 shadow-[0_18px_40px_rgba(73,52,30,0.06)] sm:px-8";
   const softCardClass = "task-soft-panel rounded-[1.5rem] border p-5";
-  const noteCardClass =
-    "task-note-panel rounded-2xl p-4 text-sm leading-7 text-[var(--foreground)]";
+  const noteCardClass = "task-note-panel rounded-2xl p-4 text-sm leading-7";
 
   return (
     <main

@@ -469,7 +469,7 @@ async function normalizeImageForOpenAI(image: {
   try {
     await fs.writeFile(inputPath, image.bytes);
 
-    await execFileAsync("/opt/homebrew/bin/ffmpeg", [
+    await execFileAsync("ffmpeg", [
       "-y",
       "-i",
       inputPath,
@@ -486,10 +486,10 @@ async function normalizeImageForOpenAI(image: {
       mimeType: "image/png",
       bytes: outputBytes,
     };
-  } catch {
-    throw new Error(
-      "OpenAI 영상용 이미지 크기를 자동으로 맞추지 못했습니다. 다른 이미지를 시도해주세요.",
-    );
+  } catch (error) {
+    console.warn("Failed to normalize OpenAI reference image, using original:", error);
+
+    return image;
   } finally {
     await fs.rm(tmpDir, { recursive: true, force: true });
   }

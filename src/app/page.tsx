@@ -40,12 +40,12 @@ const tasks = [
 
 export default function Home() {
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-6 px-4 py-5 sm:px-6 sm:py-8">
-      <section className="overflow-hidden rounded-[2rem] border border-[var(--line)] bg-[var(--card)] shadow-[0_20px_60px_rgba(73,52,30,0.08)]">
+    <main className="home-classroom mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-6 px-4 py-5 sm:px-6 sm:py-8">
+      <section className="home-classroom-card overflow-hidden rounded-[2rem] border shadow-[0_20px_60px_rgba(73,52,30,0.08)]">
         <div className="flex flex-col gap-6 px-5 py-6 sm:px-8 sm:py-8">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-medium tracking-[0.18em] text-[var(--olive)] uppercase">
+              <p className="text-sm font-medium tracking-[0.18em] text-[#60724d] uppercase">
                 제25회 홍보매체 세미나
               </p>
               <div className="mt-4 w-full max-w-4xl">
@@ -73,19 +73,27 @@ export default function Home() {
             재료가 되도록 설계했습니다.
           </p>
 
-          <div className="grid gap-3 sm:grid-cols-[1.4fr_0.9fr]">
+          <div className="grid gap-3 sm:grid-cols-[1.2fr_0.9fr]">
             <a
               href="#tasks"
               className="flex min-h-14 items-center justify-center rounded-full bg-[var(--accent)] px-6 text-base font-semibold text-white transition hover:bg-[var(--accent-strong)]"
             >
               실습 시작하기
             </a>
+            <div className="home-classroom-board rounded-[1.5rem] px-4 py-4 text-sm leading-6 text-[#f8f4eb]">
+              <p className="text-xs font-semibold tracking-[0.22em] uppercase text-[#dce7c3]">
+                오늘의 수업
+              </p>
+              <p className="mt-3">
+                글쓰기부터 편집까지 한 번에 따라가는 실습형 커리큘럼입니다.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
       <section className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-        <article className="rounded-[1.75rem] border border-[var(--line)] bg-[var(--card)] px-5 py-6 shadow-[0_12px_30px_rgba(73,52,30,0.05)] sm:px-7">
+        <article className="home-classroom-card rounded-[1.75rem] border px-5 py-6 shadow-[0_12px_30px_rgba(73,52,30,0.05)] sm:px-7">
           <p className="text-sm font-medium tracking-[0.14em] text-[var(--olive)] uppercase">
             실습 순서
           </p>
@@ -122,7 +130,7 @@ export default function Home() {
           </div>
         </article>
 
-        <article className="rounded-[1.75rem] border border-[var(--line)] bg-[var(--card)] px-5 py-6 shadow-[0_12px_30px_rgba(73,52,30,0.05)] sm:px-7">
+        <article className="home-classroom-card rounded-[1.75rem] border px-5 py-6 shadow-[0_12px_30px_rgba(73,52,30,0.05)] sm:px-7">
           <p className="text-sm font-medium tracking-[0.14em] text-[var(--olive)] uppercase">
             실습 안내
           </p>
@@ -136,7 +144,7 @@ export default function Home() {
 
       <section
         id="tasks"
-        className="rounded-[2rem] border border-[var(--line)] bg-[var(--card)] px-4 py-5 shadow-[0_18px_40px_rgba(73,52,30,0.06)] sm:px-6 sm:py-6"
+        className="home-classroom-card rounded-[2rem] border px-4 py-5 shadow-[0_18px_40px_rgba(73,52,30,0.06)] sm:px-6 sm:py-6"
       >
         <div className="flex items-end justify-between gap-4">
           <div>
@@ -157,9 +165,9 @@ export default function Home() {
           {tasks.map((task) => (
             <article
               key={task.step}
-              className="grid gap-4 rounded-[1.5rem] border border-[var(--line)] bg-[var(--card-strong)] p-4 sm:grid-cols-[auto_1fr_auto] sm:items-center sm:p-5"
+              className="home-classroom-subcard grid gap-4 rounded-[1.5rem] border p-4 sm:grid-cols-[auto_1fr_auto] sm:items-center sm:p-5"
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-lg font-semibold text-[var(--accent-strong)]">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#dbe8f8] text-lg font-semibold text-[#244f86]">
                 {task.step}
               </div>
 

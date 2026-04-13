@@ -11,40 +11,30 @@ const taskMap = {
     intro: "짧은 홍보 문장과 내레이션 원고를 만드는 단계입니다.",
     purpose: "영상의 전체 분위기와 메시지를 정하는 가장 중요한 출발점입니다.",
     output: "완성 문장 1개",
-    themeLabel: "Paper Desk",
-    themeHint: "크래프트지와 편지지 위에서 차분히 첫 문장을 다듬는 시간",
   },
   "2": {
     title: "AI로 이미지 만들기",
     intro: "문장의 분위기에 어울리는 대표 이미지를 만드는 단계입니다.",
     purpose: "영상 첫인상을 정하고, 이후 영상 생성 단계의 시각 재료가 됩니다.",
     output: "대표 이미지 1~2장",
-    themeLabel: "Canvas Studio",
-    themeHint: "마른 물감과 캔버스 결이 느껴지는 작업실 같은 장면",
   },
   "3": {
     title: "AI로 오디오 만들기",
     intro: "문장을 음성으로 바꾸어 내레이션을 만드는 단계입니다.",
     purpose: "영상이 훨씬 친근하고 전달력 있게 느껴지도록 도와줍니다.",
     output: "음성 파일 1개",
-    themeLabel: "On Air Booth",
-    themeHint: "녹음실의 붉은 조명과 따뜻한 흡음 패널 사이에서 목소리를 만드는 단계",
   },
   "4": {
     title: "AI로 영상 만들기",
     intro: "이미지와 오디오를 바탕으로 영상 초안을 만드는 단계입니다.",
     purpose: "앞 단계의 결과물을 하나의 움직이는 콘텐츠로 연결합니다.",
     output: "영상 초안 1개",
-    themeLabel: "Cinema Draft",
-    themeHint: "붉은 커튼과 스포트라이트 아래에서 첫 장면을 상영하는 느낌",
   },
   "5": {
     title: "영상 편집하기",
     intro: "CapCut에서 자막과 마무리 문구를 더해 완성도를 높이는 단계입니다.",
     purpose: "AI가 만든 초안을 사람이 보기 좋고 전하기 좋은 영상으로 다듬습니다.",
     output: "완성 영상 1개",
-    themeLabel: "Glass Edit Room",
-    themeHint: "마무리 편집 단계에 어울리는 유리 패널 느낌의 차분한 작업 공간",
   },
 } as const;
 
@@ -81,23 +71,14 @@ export default async function TaskDetail({
       className={`${stageClass} mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-5 px-4 py-5 sm:px-6 sm:py-8`}
     >
       <section className={`${sectionClass} task-hero-card`}>
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <p className="text-sm font-medium tracking-[0.14em] text-[var(--olive)] uppercase">
-              실습 과제 {step}
-            </p>
-            <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">{task.title}</h1>
-            <p className="mt-4 max-w-2xl text-base leading-7 text-[var(--muted)] sm:text-lg">
-              {task.intro}
-            </p>
-          </div>
-
-          <div className="task-theme-chip max-w-xs rounded-[1.5rem] px-4 py-4">
-            <p className="text-xs font-semibold tracking-[0.24em] uppercase opacity-75">
-              {task.themeLabel}
-            </p>
-            <p className="mt-3 text-sm leading-6">{task.themeHint}</p>
-          </div>
+        <div>
+          <p className="text-sm font-medium tracking-[0.14em] text-[var(--olive)] uppercase">
+            실습 과제 {step}
+          </p>
+          <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">{task.title}</h1>
+          <p className="mt-4 max-w-2xl text-base leading-7 text-[var(--muted)] sm:text-lg">
+            {task.intro}
+          </p>
         </div>
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2">

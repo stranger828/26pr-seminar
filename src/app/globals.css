@@ -87,10 +87,56 @@ button {
   border: 1px solid rgba(120, 91, 51, 0.1);
 }
 
-.task-theme-chip {
-  color: rgba(54, 39, 23, 0.92);
-  border: 1px solid rgba(86, 62, 35, 0.12);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+.home-classroom {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(78, 59, 32, 0.08);
+  border-radius: 2rem;
+  isolation: isolate;
+}
+
+.home-classroom::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(circle at 84% 12%, rgba(255, 242, 203, 0.3), transparent 16%),
+    radial-gradient(circle at 15% 10%, rgba(255, 255, 255, 0.34), transparent 14%),
+    linear-gradient(180deg, #d6c19b 0%, #eadcc4 22%, #f6efe4 100%);
+}
+
+.home-classroom::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(180deg, rgba(51, 88, 61, 0.12) 0 24%, transparent 24%),
+    radial-gradient(circle at 82% 18%, rgba(49, 84, 60, 0.08), transparent 14%),
+    linear-gradient(0deg, rgba(135, 98, 58, 0.08), transparent 24%);
+  pointer-events: none;
+}
+
+.home-classroom-card {
+  background: rgba(255, 251, 244, 0.84);
+  border-color: rgba(92, 73, 42, 0.12);
+  backdrop-filter: blur(10px);
+}
+
+.home-classroom-subcard {
+  background:
+    linear-gradient(180deg, rgba(255, 253, 247, 0.96), rgba(248, 241, 228, 0.94));
+  border-color: rgba(106, 84, 50, 0.12);
+}
+
+.home-classroom-board {
+  background:
+    linear-gradient(180deg, rgba(49, 88, 64, 0.98), rgba(36, 68, 48, 0.96));
+  border: 1px solid rgba(233, 214, 174, 0.22);
+  box-shadow:
+    inset 0 0 0 3px rgba(244, 233, 206, 0.08),
+    inset 0 0 40px rgba(0, 0, 0, 0.14);
 }
 
 .task-theme-1::before {
@@ -115,11 +161,6 @@ button {
   background:
     linear-gradient(180deg, rgba(255, 249, 238, 0.96), rgba(249, 242, 227, 0.9)),
     linear-gradient(90deg, rgba(181, 134, 78, 0.16), transparent 14%);
-}
-
-.task-theme-1 .task-theme-chip {
-  background:
-    linear-gradient(180deg, rgba(238, 217, 182, 0.95), rgba(228, 203, 162, 0.92));
 }
 
 .task-theme-1 .task-note-panel {
@@ -147,11 +188,6 @@ button {
 .task-theme-2 .task-hero-card {
   background:
     linear-gradient(180deg, rgba(253, 250, 244, 0.92), rgba(245, 241, 233, 0.9));
-}
-
-.task-theme-2 .task-theme-chip {
-  background:
-    linear-gradient(180deg, rgba(226, 233, 237, 0.94), rgba(209, 219, 224, 0.92));
 }
 
 .task-theme-2 .task-note-panel {
@@ -192,13 +228,6 @@ button {
     linear-gradient(180deg, rgba(12, 18, 33, 0.86), rgba(18, 25, 46, 0.82));
 }
 
-.task-theme-3 .task-theme-chip {
-  background:
-    linear-gradient(180deg, rgba(255, 80, 108, 0.24), rgba(43, 71, 146, 0.28));
-  color: #fff2f4;
-  border-color: rgba(255, 255, 255, 0.12);
-}
-
 .task-theme-3 .task-note-panel {
   background: rgba(27, 35, 54, 0.9);
   border-color: rgba(255, 255, 255, 0.08);
@@ -237,13 +266,6 @@ button {
     linear-gradient(180deg, rgba(54, 14, 25, 0.82), rgba(35, 12, 21, 0.8));
 }
 
-.task-theme-4 .task-theme-chip {
-  background:
-    linear-gradient(180deg, rgba(152, 29, 46, 0.42), rgba(87, 14, 29, 0.5));
-  color: #fff5ea;
-  border-color: rgba(255, 224, 192, 0.12);
-}
-
 .task-theme-4 .task-note-panel {
   background: rgba(69, 21, 33, 0.86);
   border-color: rgba(255, 232, 202, 0.08);
@@ -268,8 +290,7 @@ button {
 
 .task-theme-5 .task-shell-card,
 .task-theme-5 .task-soft-panel,
-.task-theme-5 .task-note-panel,
-.task-theme-5 .task-theme-chip {
+.task-theme-5 .task-note-panel {
   background: rgba(255, 255, 255, 0.34);
   border-color: rgba(255, 255, 255, 0.3);
   backdrop-filter: blur(18px);

@@ -8,7 +8,7 @@ import { promisify } from "node:util";
 import { saveBinaryGalleryItem } from "@/lib/gallery-store";
 
 export const runtime = "nodejs";
-export const maxDuration = 600;
+export const maxDuration = 300;
 
 type Provider = "openai" | "gemini";
 const execFileAsync = promisify(execFile);

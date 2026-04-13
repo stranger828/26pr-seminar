@@ -136,7 +136,13 @@ async function generateWithOpenAI(prompt: string) {
           ],
         },
       ],
-      max_output_tokens: 700,
+      reasoning: {
+        effort: "low",
+      },
+      text: {
+        verbosity: "low",
+      },
+      max_output_tokens: 1200,
     }),
   });
 

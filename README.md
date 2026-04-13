@@ -38,3 +38,10 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 ## Note
 
 This project is configured for Next.js deployment on Vercel.
+
+## Supabase Setup
+
+1. Open the Supabase SQL Editor and run `supabase/gallery-setup.sql`.
+2. Copy `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` into `.env.local`.
+3. Optionally change `SUPABASE_GALLERY_BUCKET` if you want a different bucket name.
+4. Restart the Next.js server after updating environment variables.

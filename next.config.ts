@@ -9,12 +9,14 @@ const nextConfig: NextConfig = {
       return [];
     }
 
-    return [
-      {
-        source: "/:path*",
-        destination: `${proxyTarget}/:path*`,
-      },
-    ];
+    return {
+      beforeFiles: [
+        {
+          source: "/:path*",
+          destination: `${proxyTarget}/:path*`,
+        },
+      ],
+    };
   },
 };
 

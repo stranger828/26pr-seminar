@@ -1,9 +1,7 @@
 import { randomUUID } from "node:crypto";
-import {
-  getGalleryBucketName,
-  getSupabaseAdmin,
-  hasSupabaseConfig,
-} from "@/lib/supabase-admin";
+import { promises as fs } from "node:fs";
+import path from "node:path";
+import { Pool } from "pg";
 
 export type GalleryTaskStep = "1" | "2" | "3" | "4";
 export type GalleryItemType = "text" | "image" | "audio" | "video";
@@ -19,6 +17,7 @@ export type GalleryItem = {
   secondaryPrompt?: string;
   resultText?: string;
   assetUrl?: string;
+  assetPath?: string;
   mimeType?: string;
   createdAt: string;
 };
@@ -35,10 +34,12 @@ type GalleryItemRow = {
   result_text: string | null;
   asset_path: string | null;
   mime_type: string | null;
-  created_at: string;
+  created_at: Date | string;
 };
 
 const tableName = "gallery_items";
+
+let cachedPool: Pool | null = null;
 
 const taskTitles: Record<GalleryTaskStep, string> = {
   "1": "AI로 글쓰기",
@@ -48,21 +49,49 @@ const taskTitles: Record<GalleryTaskStep, string> = {
 };
 
 export async function listGalleryItems() {
-  if (!hasSupabaseConfig()) {
+  if (!hasDatabaseConfig()) {
     return [];
   }
 
-  const supabase = getSupabaseAdmin();
-  const { data, error } = await supabase
-    .from(tableName)
-    .select("*")
-    .order("created_at", { ascending: false });
+  const { rows } = await getGalleryPool().query<GalleryItemRow>(
+    `select *
+       from ${tableName}
+      order by created_at desc`,
+  );
 
-  if (error) {
-    throw new Error(`갤러리 목록을 불러오지 못했습니다: ${error.message}`);
+  return rows.map(mapRowToGalleryItem);
+}
+
+export async function deleteGalleryItem(itemId: string) {
+  if (!hasDatabaseConfig()) {
+    throw new Error("DB 설정이 없어 결과물을 삭제할 수 없습니다.");
   }
 
-  return (data || []).map(mapRowToGalleryItem);
+  const pool = getGalleryPool();
+  const { rows } = await pool.query<GalleryItemRow>(
+    `select *
+       from ${tableName}
+      where id = $1
+      limit 1`,
+    [itemId],
+  );
+
+  const data = rows[0];
+  if (!data) {
+    throw new Error("삭제할 결과물이 없습니다.");
+  }
+
+  if (data.asset_path) {
+    await deleteAsset(data.asset_path);
+  }
+
+  await pool.query(
+    `delete from ${tableName}
+      where id = $1`,
+    [itemId],
+  );
+
+  return mapRowToGalleryItem(data);
 }
 
 export async function saveTextGalleryItem(input: {
@@ -152,35 +181,53 @@ export async function saveBinaryGalleryItem(input: {
 }
 
 async function findGalleryItemByExternalJobId(externalJobId: string) {
-  const supabase = getSupabaseAdmin();
-  const { data, error } = await supabase
-    .from(tableName)
-    .select("*")
-    .eq("external_job_id", externalJobId)
-    .maybeSingle();
+  const { rows } = await getGalleryPool().query<GalleryItemRow>(
+    `select *
+       from ${tableName}
+      where external_job_id = $1
+      limit 1`,
+    [externalJobId],
+  );
 
-  if (error) {
-    throw new Error(`기존 영상 결과를 확인하지 못했습니다: ${error.message}`);
-  }
-
-  return data ? mapRowToGalleryItem(data) : null;
+  return rows[0] ? mapRowToGalleryItem(rows[0]) : null;
 }
 
 async function insertGalleryItem(
   row: Omit<GalleryItemRow, "created_at">,
 ) {
-  const supabase = getSupabaseAdmin();
-  const { data, error } = await supabase
-    .from(tableName)
-    .insert(row)
-    .select("*")
-    .single();
+  const { rows } = await getGalleryPool().query<GalleryItemRow>(
+    `insert into ${tableName} (
+       id,
+       task_step,
+       task_title,
+       type,
+       provider,
+       external_job_id,
+       prompt,
+       secondary_prompt,
+       result_text,
+       asset_path,
+       mime_type
+     ) values (
+       $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
+     )
+     returning *`,
+    [
+      row.id,
+      row.task_step,
+      row.task_title,
+      row.type,
+      row.provider,
+      row.external_job_id,
+      row.prompt,
+      row.secondary_prompt,
+      row.result_text,
+      row.asset_path,
+      row.mime_type,
+    ],
+  );
 
-  if (error) {
-    throw new Error(`갤러리 저장에 실패했습니다: ${error.message}`);
-  }
-
-  return mapRowToGalleryItem(data);
+  return mapRowToGalleryItem(rows[0]);
 }
 
 async function uploadAsset(
@@ -188,16 +235,10 @@ async function uploadAsset(
   bytes: Buffer,
   mimeType: string,
 ) {
-  const supabase = getSupabaseAdmin();
-  const bucket = getGalleryBucketName();
-  const { error } = await supabase.storage.from(bucket).upload(assetPath, bytes, {
-    contentType: mimeType,
-    upsert: false,
-  });
-
-  if (error) {
-    throw new Error(`파일 업로드에 실패했습니다: ${error.message}`);
-  }
+  void mimeType;
+  const filePath = resolveAssetFilePath(assetPath);
+  await fs.mkdir(path.dirname(filePath), { recursive: true });
+  await fs.writeFile(filePath, bytes, { flag: "wx" });
 }
 
 function mapRowToGalleryItem(row: GalleryItemRow): GalleryItem {
@@ -212,16 +253,76 @@ function mapRowToGalleryItem(row: GalleryItemRow): GalleryItem {
     secondaryPrompt: row.secondary_prompt || undefined,
     resultText: row.result_text || undefined,
     assetUrl: row.asset_path ? getPublicAssetUrl(row.asset_path) : undefined,
+    assetPath: row.asset_path || undefined,
     mimeType: row.mime_type || undefined,
-    createdAt: row.created_at,
+    createdAt: formatTimestamp(row.created_at),
   };
 }
 
 function getPublicAssetUrl(assetPath: string) {
-  const supabase = getSupabaseAdmin();
-  const bucket = getGalleryBucketName();
-  const { data } = supabase.storage.from(bucket).getPublicUrl(assetPath);
-  return data.publicUrl;
+  const baseUrl = process.env.GALLERY_ASSET_BASE_URL;
+
+  if (!baseUrl) {
+    throw new Error("GALLERY_ASSET_BASE_URL을 먼저 설정해주세요.");
+  }
+
+  return `${baseUrl.replace(/\/+$/, "")}/${assetPath}`;
+}
+
+function hasDatabaseConfig() {
+  return Boolean(process.env.DATABASE_URL);
+}
+
+function getGalleryPool() {
+  if (cachedPool) {
+    return cachedPool;
+  }
+
+  const connectionString = process.env.DATABASE_URL;
+
+  if (!connectionString) {
+    throw new Error("DATABASE_URL을 먼저 설정해주세요.");
+  }
+
+  cachedPool = new Pool({ connectionString });
+  return cachedPool;
+}
+
+async function deleteAsset(assetPath: string) {
+  try {
+    await fs.unlink(resolveAssetFilePath(assetPath));
+  } catch (error) {
+    if (isNodeError(error) && error.code === "ENOENT") {
+      return;
+    }
+
+    throw new Error("파일 삭제에 실패했습니다.");
+  }
+}
+
+function resolveAssetFilePath(assetPath: string) {
+  const assetDir = process.env.GALLERY_ASSET_DIR;
+
+  if (!assetDir) {
+    throw new Error("GALLERY_ASSET_DIR을 먼저 설정해주세요.");
+  }
+
+  const root = path.resolve(assetDir);
+  const filePath = path.resolve(root, assetPath);
+
+  if (filePath !== root && filePath.startsWith(`${root}${path.sep}`)) {
+    return filePath;
+  }
+
+  throw new Error("저장할 파일 경로가 올바르지 않습니다.");
+}
+
+function isNodeError(error: unknown): error is NodeJS.ErrnoException {
+  return error instanceof Error && "code" in error;
+}
+
+function formatTimestamp(value: Date | string) {
+  return value instanceof Date ? value.toISOString() : value;
 }
 
 function buildAssetPrefix(step: GalleryTaskStep, provider: string) {

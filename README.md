@@ -39,16 +39,66 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 This project is configured for Next.js deployment on Vercel.
 
-## Supabase Setup
+## NAS Gallery Setup
 
-1. Open the Supabase SQL Editor and run `supabase/gallery-setup.sql`.
-2. Copy `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` into `.env.local`.
-3. Optionally change `SUPABASE_GALLERY_BUCKET` if you want a different bucket name.
+1. Create the `gallery_items` table in PostgreSQL. The table shape is documented in `supabase/gallery-setup.sql`; skip the Supabase Storage bucket statement when using plain PostgreSQL.
+2. Copy `DATABASE_URL`, `GALLERY_ASSET_DIR`, and `GALLERY_ASSET_BASE_URL` into `.env.local`.
+3. Place gallery files under the public asset directory, preserving paths like `task-2/openai/file.png`.
 4. Restart the Next.js server after updating environment variables.
-5. Run `npm run verify:supabase` to confirm table read/write, storage upload, public URL generation, and cleanup all succeed.
+5. Run `npm run verify:gallery` to confirm table read/write, asset file write, public URL access, and cleanup all succeed.
 
 ### Verification Notes
 
-- `SUPABASE_SERVICE_ROLE_KEY` must be the server-side service role key, not the anon key.
-- If you change `SUPABASE_GALLERY_BUCKET`, create the same bucket name in Supabase before verification.
+- `DATABASE_URL` should point to the NAS PostgreSQL port, for example `postgresql://aiedu_user:password@192.168.0.6:5433/aieducation`.
+- `GALLERY_ASSET_DIR` is the filesystem path where the running Next.js server can write gallery files. On a Mac, this may be a mounted NAS path such as `/Volumes/web/ai_gallery`; inside a NAS container, use the mounted container path.
+- `GALLERY_ASSET_BASE_URL` is the browser-visible URL for the same directory, for example `http://192.168.0.6/ai_gallery`.
 - The verification script inserts one temporary probe row and one temporary probe file, then deletes both immediately after the check.
+
+## Synology Docker Deployment
+
+The app is configured for Next.js standalone output and can run in Synology Container Manager.
+
+1. Copy this project folder to the NAS, excluding `node_modules`, `.next`, and `migration`.
+2. Create `.env.production` on the NAS using `deploy/synology.env.example` as a template.
+3. In Container Manager, create a Project from `docker-compose.synology.yml`.
+
+The compose file maps:
+
+```text
+NAS 3000 -> Container 3000
+/volume1/web/ai_gallery -> /app/gallery-assets
+```
+
+If you prefer manual Docker commands, build the image from this folder:
+
+```bash
+docker build -t aieducation-web .
+```
+
+Then create a container from `aieducation-web` and map the container port:
+
+```text
+NAS 3000 -> Container 3000
+```
+
+Mount the NAS gallery folder:
+
+```text
+/volume1/web/ai_gallery -> /app/gallery-assets
+```
+
+Set environment variables using `deploy/synology.env.example` as a template.
+
+Inside the NAS container, use:
+
+```env
+DATABASE_URL=postgresql://aiedu_user:password@192.168.0.6:5433/aieducation
+GALLERY_ASSET_DIR=/app/gallery-assets
+GALLERY_ASSET_BASE_URL=http://pckwgallery.synology.me/ai_gallery
+```
+
+After the container starts, test the app at:
+
+```text
+http://192.168.0.6:3000
+```

@@ -1,0 +1,12 @@
+services:
+  web:
+    build:
+      context: .
+    container_name: aieducation-web
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    ports:
+      - "3000:3000"
+    volumes:
+      - /volume1/web/ai_gallery:/app/gallery-assets
